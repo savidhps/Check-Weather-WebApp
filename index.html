@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #ffffff;
+            color: black;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            border-style: solid;
+            border-color: rgb(19, 20, 20);
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .search-box input {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .search-box button {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #000000;
+            color: white;
+            font-weight: bold;
+        }
+
+        .weather-card {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 18px;
+            display: none;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .weather-card i {
+            font-size: 50px;
+            margin: 10px;
+        }
+
+        .creator {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .col {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .col-1 {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .col-2 {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            border-style: dashed;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Weather App</h2>
+        <div class="search-box">
+            <input type="text" id="city" placeholder="Enter city name">
+            <button class="button" onclick="getWeather()">Search</button>
+        </div>
+        <div id="weatherCard" class="weather-card hidden">
+            <div class="col">
+                <i id="weatherIcon" class="fas"></i>
+                <div class="col-1">
+                    <p id="temperature"></p>
+                    <p id="description"></p>
+                </div>
+            </div>
+            <div class="col-2">
+                <p><strong>Humidity:</strong> <span id="humidity"></span>%</p>
+                <p><strong>Wind Speed:</strong> <span id="wind"></span> m/s</p>
+                <p><strong>Pressure:</strong> <span id="pressure"></span> hPa</p>
+            </div>
+            <div class="col">
+                <i id="dayNightIcon" class="fas"></i>
+                <h3 id="place"></h3>
+                <p id="date"></p>
+            </div>
+        </div>
+    </div>
+    <p class="creator">Created by Savidh</p>
+
+    <script>
+        async function getWeather() {
+            const city = document.getElementById('city').value;
+            if (city === '') {
+                alert('Enter a valid city name');
+                return;
+            }
+
+            const apiKey = '66a0529e6769292c87beebd057aa4e52';
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.cod === 200) {
+                    document.getElementById('place').innerText = `${data.name}, ${data.sys.country}`;
+                    document.getElementById('date').innerText = new Date().toLocaleDateString();
+                    document.getElementById('temperature').innerText = `${data.main.temp}°C`;
+                    document.getElementById('description').innerText = data.weather[0].description;
+                    document.getElementById('humidity').innerText = data.main.humidity;
+                    document.getElementById('wind').innerText = data.wind.speed;
+                    document.getElementById('pressure').innerText = data.main.pressure;
+
+                    const weatherIcon = document.getElementById('weatherIcon');
+                    const dayNightIcon = document.getElementById('dayNightIcon');
+                    const weatherCard = document.getElementById('weatherCard');
+
+                    const weatherType = data.weather[0].main.toLowerCase();
+                    const isDaytime = data.dt > data.sys.sunrise && data.dt < data.sys.sunset;
+
+                    weatherCard.classList.remove('hidden');
+                    dayNightIcon.className = isDaytime ? "fas fa-sun" : "fas fa-moon";
+
+                    if (weatherType.includes("clear")) {
+                        weatherIcon.className = "fas fa-sun";
+                    } else if (weatherType.includes("cloud")) {
+                        weatherIcon.className = "fas fa-cloud";
+                    } else if (weatherType.includes("rain")) {
+                        weatherIcon.className = "fas fa-cloud-showers-heavy";
+                    } else if (weatherType.includes("snow")) {
+                        weatherIcon.className = "fas fa-snowflake";
+                    } else {
+                        weatherIcon.className = "fas fa-smog";
+                    }
+
+                    weatherCard.style.display = 'block';
+                } else {
+                    alert("City not found!");
+                }
+            } catch (error) {
+                console.error('Error fetching weather data:', error);
+                alert('Failed to fetch weather data.');
+            }
+        }
+    </script>
+</body>
+
+</html>
